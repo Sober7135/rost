@@ -6,10 +6,12 @@
 use core::arch::global_asm;
 use log::{debug, error, info, trace, warn};
 
+#[macro_use]
 mod console;
 mod lang_items;
 mod logger;
 mod sbi;
+mod stack_trace;
 
 global_asm!(include_str!("entry.asm"));
 
@@ -56,7 +58,7 @@ fn rust_main() {
 
     println!("Hello, World!");
 
-    // panic!("THIS IS PANIC");
+    panic!("THIS IS PANIC");
 
     sbi::shutdown(false);
 }
