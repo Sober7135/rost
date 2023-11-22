@@ -20,7 +20,7 @@ objdump: os
 			rust-objdump -h $(TARGET_DIR)/os  | $(vi) -
 			
 user:  $(USER_DIR)/*
-		cd $(USER_DIR) && cargo build --$(MODE)
+		cd $(USER_DIR) && ./build.py 
 		$(call strip_bin,00hello_world)
 		$(call strip_bin,01store_fault)
 		$(call strip_bin,02power)

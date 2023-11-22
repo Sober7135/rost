@@ -66,25 +66,25 @@ impl AppManager {
         }
     }
 
-    pub(crate) fn load_app(&self, app_id: usize) {
-        if app_id >= self.num_app {
-            info!("[kernel] All programs completed");
-            shutdown(false);
-        }
-
-        info!("[kernel] load app_{}", app_id);
+    pub(crate) fn load_app(&self) {
         unsafe {
-            // clear app area
-            core::ptr::write_bytes(APP_BASE_ADDRESS as *mut u8, 0, APP_SIZE_LIMIT);
-
-            core::ptr::copy(
-                self.apps_start[app_id] as *const u8,
+            core::ptr::write_bytes(
                 APP_BASE_ADDRESS as *mut u8,
-                self.apps_start[app_id + 1] - self.apps_start[app_id],
-            );
-
-            asm!("fence.i")
+                0,
+                self.num_app * APP_SIZE_LIMIT,
+            )
         };
+
+        for app_id in 0..self.num_app {
+            unsafe {
+                // clear app area
+                core::ptr::copy(
+                    self.apps_start[app_id] as *const u8,
+                    (APP_BASE_ADDRESS + app_id * APP_SIZE_LIMIT) as *mut u8,
+                    self.apps_start[app_id + 1] - self.apps_start[app_id],
+                );
+            };
+        }
     }
 
     pub(crate) fn move_to_next(&mut self) {
@@ -113,13 +113,20 @@ lazy_static! {
 }
 
 pub(crate) fn init() {
-    APP_MANANGER.exclusive_access().print_app_info();
+    let app_manager = APP_MANANGER.exclusive_access();
+    app_manager.print_app_info();
+    trace!("[kernel] starting loading apps");
+    app_manager.load_app();
+    drop(app_manager);
+    trace!("[kernel] finishing loading apps");
 }
 
 pub(crate) fn run_next_app() -> ! {
     let mut app_manager = APP_MANANGER.exclusive_access();
     let current_app = app_manager.current_app;
-    app_manager.load_app(current_app);
+    if current_app >= app_manager.num_app {
+        shutdown(false)
+    }
     app_manager.move_to_next();
     drop(app_manager);
 
@@ -127,10 +134,9 @@ pub(crate) fn run_next_app() -> ! {
     extern "C" {
         fn __restore(addr: usize);
     }
-    info!("In run_next_app");
     unsafe {
         __restore(KERNEL_STACK.push_context(TrapContext::app_init_context(
-            APP_BASE_ADDRESS,
+            APP_BASE_ADDRESS + current_app * APP_SIZE_LIMIT,
             USER_STACK.get_sp(),
         )) as *mut TrapContext as usize)
     }
