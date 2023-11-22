@@ -1,7 +1,6 @@
 use crate::{sbi::shutdown, sync::UpSafeCell, trap::TrapContext};
-use core::arch::asm;
 use lazy_static::lazy_static;
-use log::{info, trace};
+use log::trace;
 
 const MAX_APP_NUM: usize = 16;
 const APP_BASE_ADDRESS: usize = 0x8040_0000;
