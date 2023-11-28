@@ -1,7 +1,7 @@
 mod context;
 
 use crate::{
-    batch::run_next_app,
+    loader::run_next_app,
     syscall::{syscall, Syscall},
 };
 use core::arch::global_asm;
