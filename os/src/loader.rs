@@ -1,6 +1,6 @@
 use crate::{sbi::shutdown, sync::UpSafeCell, trap::TrapContext};
 use lazy_static::lazy_static;
-use log::trace;
+use log::{debug, trace};
 
 const MAX_APP_NUM: usize = 16;
 const APP_BASE_ADDRESS: usize = 0x8040_0000;
@@ -114,10 +114,10 @@ lazy_static! {
 pub(crate) fn init() {
     let app_manager = APP_MANANGER.exclusive_access();
     app_manager.print_app_info();
-    trace!("[kernel] starting loading apps");
+    debug!("[kernel] starting loading apps");
     app_manager.load_app();
     drop(app_manager);
-    trace!("[kernel] finishing loading apps");
+    debug!("[kernel] finish loading apps");
 }
 
 pub(crate) fn run_next_app() -> ! {
