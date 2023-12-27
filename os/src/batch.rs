@@ -104,9 +104,9 @@ lazy_static! {
             // num_app + 1 to copy the last app's end address
             core::ptr::copy(num_app_ptr.add(1), apps_start.as_mut_ptr(), num_app + 1);
             AppManager {
-                num_app: num_app,
+                num_app,
                 current_app: 0,
-                apps_start: apps_start,
+                apps_start,
             }
         })
     };
