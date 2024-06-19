@@ -1,44 +1,52 @@
-MODE = release
-
-OS_DIR = os
-USER_DIR = user
-OS_SOURCE_DIR = $(OS_DIR)/src
-USER_SOURCE_DIR = $(USER_DIR)/src
-TARGET_DIR = target/riscv64gc-unknown-none-elf/$(MODE)
+TARGET := riscv64gc-unknown-none-elf
+MODE := release
+KERNEL_ELF := target/$(TARGET)/$(MODE)/os
+KERNEL_BIN := $(KERNEL_ELF).bin
+DISASM_TMP := target/$(TARGET)/$(MODE)/asm
+APPS := user/src/bin/*
+OBJCOPY := llvm-objcopy
+GDB := gdb
 vi = nvim --noplugin
 
-os: $(OS_SOURCE_DIR)/* user
-		cd $(OS_DIR) && cargo build --$(MODE)
-		objcopy --strip-all $(TARGET_DIR)/os -O binary -I elf64-little  $(TARGET_DIR)/os.bin	
-	
-objdump: os
-	objdump -h $(TARGET_DIR)/os  | $(vi) -
-			
-user:  $(USER_DIR)/*
-		cd $(USER_DIR) && ./build.py 
+kernel: $(KERNEL_BIN)
 
-qemu: os user
-		qemu-system-riscv64 \
+$(KERNEL_BIN): $(KERNEL_ELF)
+		@$(OBJCOPY) --strip-all $(KERNEL_ELF) -O binary -I elf64-little  $(KERNEL_BIN)	
+
+$(KERNEL_ELF): os/ user
+		@cd os && cargo build --$(MODE)
+	
+user: user/
+		@cd user && ./build.py 
+		
+build: kernel user
+
+run: build
+		@qemu-system-riscv64 \
   	  	-machine virt \
   	  	-nographic \
   	  	-bios ./bootloader/rustsbi-qemu.bin \
-  	  	-device loader,file=$(TARGET_DIR)/os.bin,addr=0x80200000
+  	  	-device loader,file=$(KERNEL_BIN),addr=0x80200000
 
-debug: os
-		qemu-system-riscv64 \
+gdbserver: build
+		@qemu-system-riscv64 \
     		-machine virt \
     		-nographic \
     		-bios ./bootloader/rustsbi-qemu.bin \
-    		-device loader,file=$(TARGET_DIR)/os.bin,addr=0x80200000 \
+    		-device loader,file=$(KERNEL_BIN),addr=0x80200000 \
     		-s -S
 
-gdb: os user
-		riscv64-unknown-elf-gdb \
+gdbclient: build env
+		@$(GDB) \
     		-ex 'file target/riscv64gc-unknown-none-elf/release/os' \
     		-ex 'set arch riscv:rv64' \
     		-ex 'target remote localhost:1234'
 
 clean: 
-		cargo clean
-		rm -f os/src/link_app.S
+		@cargo clean
+		@rm -f os/src/link_app.S
 
+clippy:
+		@cargo clippy
+
+.PHONY: user kernel
