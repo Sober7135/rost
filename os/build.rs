@@ -9,7 +9,7 @@ fn main() {
     insert_app().unwrap();
 }
 
-static TARGET_PATH: &str = "./target/riscv64gc-unknown-none-elf/release";
+static TARGET_PATH: &str = "./target/riscv64gc-unknown-none-elf/debug";
 
 fn insert_app() -> Result<()> {
     let mut link_file = File::create("src/link_app.S").unwrap();

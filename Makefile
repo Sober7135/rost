@@ -1,4 +1,4 @@
-MODE = release
+MODE = debug
 
 OS_DIR = os
 USER_DIR = user
@@ -12,7 +12,7 @@ define strip_bin
 endef
 
 os: $(OS_SOURCE_DIR)/* user
-		cd $(OS_DIR) && cargo build --$(MODE)
+		cd $(OS_DIR) && cargo build
 		# rust-objcopy --strip-all $(TARGET_DIR)/os -O binary  $(TARGET_DIR)/os.bin	
 		$(call strip_bin,os)
 	
@@ -20,7 +20,7 @@ objdump: os
 			rust-objdump -h $(TARGET_DIR)/os  | $(vi) -
 			
 user:  $(USER_DIR)/*
-		cd $(USER_DIR) && cargo build --$(MODE)
+		cd $(USER_DIR) && cargo build
 		$(call strip_bin,00hello_world)
 		$(call strip_bin,01store_fault)
 		$(call strip_bin,02power)
