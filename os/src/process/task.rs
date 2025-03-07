@@ -166,7 +166,7 @@ impl TaskControlBlock {
             return -2;
         }
         drop(inner);
-        let mut idx = 0;
+        let idx;
         loop {
             inner = self.inner.lock();
             if let Some((index, _)) = inner

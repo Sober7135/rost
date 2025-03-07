@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 #![feature(format_args_nl)]
-#![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
 
 #[macro_use]

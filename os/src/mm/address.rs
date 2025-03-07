@@ -154,7 +154,7 @@ impl PhysicalAddr {
     }
 
     pub fn ceil(&self) -> PhysicalPageNumber {
-        PhysicalPageNumber((self.0 + PAGE_SIZE - 1) / PAGE_SIZE)
+        PhysicalPageNumber(self.0.div_ceil(PAGE_SIZE))
     }
 
     pub fn get_mut<T>(&self) -> &'static mut T {
@@ -172,7 +172,7 @@ impl VirtualAddr {
     }
 
     pub fn ceil(&self) -> VirtualPageNumber {
-        VirtualPageNumber((self.0 + PAGE_SIZE - 1) / PAGE_SIZE)
+        VirtualPageNumber(self.0.div_ceil(PAGE_SIZE))
     }
 }
 

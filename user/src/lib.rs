@@ -1,5 +1,4 @@
 #![no_std]
-#![feature(panic_info_message)]
 #![feature(allow_internal_unstable)] // `format_args_nl`
 #![feature(linkage)]
 #![feature(format_args_nl)]

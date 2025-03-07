@@ -98,7 +98,7 @@ impl FrameAllocator for StackAllocator {
     }
 
     fn dealloca(&mut self, ppn: PhysicalPageNumber) {
-        if ppn.0 >= self.current || self.recycled.iter().any(|&v| v == ppn.0) {
+        if ppn.0 >= self.current || self.recycled.contains(&ppn.0) {
             panic!("Frame ppn={:#x} has not been allocated!", ppn.0);
         }
         self.recycled.push(ppn.into())
